@@ -23,7 +23,7 @@
                         'Authorization': 'Bearer ' + apiKey
                     },
                     body: JSON.stringify({
-                        model: "pplx-7b-online", // Updated to correct model name
+                        model: "mistral-7b-instruct", // Updated to definitely supported model
                         messages: [
                             {role: "system", content: "You are a helpful assistant"},
                             {role: "user", content: "Say 'API Success!'"}
