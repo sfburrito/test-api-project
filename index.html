@@ -4,14 +4,19 @@
     <title>API Test</title>
 </head>
 <body>
-    <button onclick="callAPI()">Test API</button>
-    <div id="result"></div>
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px;">
+        <h1>Ask Perplexity Anything! 🤖</h1>
+        <input type="text" id="userInput" placeholder="Ask a question..." style="width: 80%; padding: 10px; margin-right: 10px;">
+        <button onclick="callAPI()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Ask!</button>
+        <div id="result" style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; min-height: 50px;"></div>
+    </div>
 
     <script>
         async function callAPI() {
             try {
+                const userQuestion = document.getElementById('userInput').value;
                 const resultDiv = document.getElementById('result');
-                resultDiv.innerText = "Loading...";
+                resultDiv.innerText = "Thinking... 🤔";
                 
                 // 🔑 Replace with ACTUAL Perplexity API key (starts with pplx-)
                 const apiKey = "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";
@@ -26,8 +31,8 @@
                     body: JSON.stringify({
                         model: "sonar-pro",
                         messages: [
-                            {role: "system", content: "Be precise and concise."},
-                            {role: "user", content: "Say 'API Success!'"}
+                            {role: "system", content: "You are a friendly and knowledgeable AI assistant. Keep responses concise but engaging."},
+                            {role: "user", content: userQuestion}
                         ]
                     })
                 });
@@ -40,13 +45,13 @@
                 if(data?.choices?.[0]?.message?.content) {
                     resultDiv.innerText = data.choices[0].message.content;
                 } else {
-                    resultDiv.innerText = "API response format unexpected";
+                    resultDiv.innerText = "Oops! Something went wrong. Try asking another question!";
                 }
                 
             } catch (error) {
                 resultDiv.innerText = "Error: " + error.message;
             }
         }
-        </script>
+    </script>
 </body>
 </html>
