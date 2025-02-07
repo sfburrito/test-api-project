@@ -9,8 +9,30 @@
 
     <script>
     async function callAPI() {
-        // We'll add the API call code here later
-        console.log("Button clicked!");
+        try {
+            // Show loading state
+            document.getElementById('result').innerText = "Loading...";
+            
+            // Your API key goes here 👇
+            const apiKey = "sk-fd51ffc3e8804b6da828bc516929f426"; // ← Replace with your actual key
+            
+            const response = await fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [{role: "user", content: "Hello! Can you say 'Test successful'?"}]
+                })
+            });
+            
+            const data = await response.json();
+            document.getElementById('result').innerText = data.choices[0].message.content;
+        } catch (error) {
+            document.getElementById('result').innerText = "Error: " + error.message;
+        }
     }
     </script>
 </body>
