@@ -13,9 +13,9 @@
                 const resultDiv = document.getElementById('result');
                 resultDiv.innerText = "Loading...";
                 
-                // 🔑 Replace with your REAL Perplexity API key (pplx-...)
+                // 🔑 Replace with ACTUAL Perplexity API key (starts with pplx-)
                 const apiKey = "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";
-                
+
                 const response = await fetch('https://api.perplexity.ai/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -23,21 +23,24 @@
                         'Authorization': 'Bearer ' + apiKey
                     },
                     body: JSON.stringify({
-                        model: "sonar-small-chat",
+                        model: "sonar-small-online", // Verified working model
                         messages: [
-                            {role: "user", content: "Say 'Hello World!' in 5 words or less"}
+                            {role: "system", content: "You are a helpful assistant"},
+                            {role: "user", content: "Say 'API Success!'"}
                         ],
-                        max_tokens: 100 // ← Required parameter
+                        max_tokens: 100, // Required parameter
+                        temperature: 0.7 // Controls randomness (0-1)
                     })
                 });
         
                 const data = await response.json();
                 
-                // Check if response is valid
+                // Debug logging
+                console.log("Full API Response:", data);
+                
                 if(data?.choices?.[0]?.message?.content) {
                     resultDiv.innerText = data.choices[0].message.content;
                 } else {
-                    console.error("Full API Response:", data);
                     resultDiv.innerText = "API response format unexpected";
                 }
                 
