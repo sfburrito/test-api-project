@@ -10,40 +10,31 @@
     <script>
         async function callAPI() {
             try {
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerText = "Loading...";
+                document.getElementById('result').innerText = "Loading...";
                 
-                // Replace with your actual API key
-                const apiKey = "sk-fd51ffc3e8804b6da828bc516929f426";
+                // 🔑 Replace with your Perplexity API key (from account settings)
+                const apiKey = "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";
                 
-                const response = await fetch('https://api.deepseek.com/chat/completions', {
+                const response = await fetch('https://api.perplexity.ai/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + apiKey
                     },
                     body: JSON.stringify({
-                        model: "deepseek-chat",
-                        messages: [{
-                            role: "user", 
-                            content: "Reply with just 'Success!'"
-                        }]
+                        model: "sonar-small-chat", // Free model using your credits
+                        messages: [
+                            {role: "system", content: "Respond in 10 words or less"},
+                            {role: "user", content: "Say 'API Success!'"}
+                        ]
                     })
                 });
         
                 const data = await response.json();
-                
-                // Add safety checks
-                if(data?.choices?.[0]?.message?.content) {
-                    resultDiv.innerText = data.choices[0].message.content;
-                } else {
-                    console.error("Unexpected response:", data);
-                    resultDiv.innerText = "API returned unexpected format";
-                }
+                document.getElementById('result').innerText = data.choices[0].message.content;
                 
             } catch (error) {
-                document.getElementById('result').innerText = 
-                    "Error: " + (error.message || "Unknown error occurred");
+                document.getElementById('result').innerText = "Error: " + error.message;
             }
         }
         </script>
