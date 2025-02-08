@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>API Test</title>
+    <title>Country Guesser AI</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -84,58 +84,155 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+
+        .chat-container {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .ai-message {
+            background: #e3f2fd;
+            margin-right: auto;
+        }
+
+        .user-message {
+            background: #e8f5e9;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .yes-btn {
+            background: #4CAF50;
+        }
+
+        .no-btn {
+            background: #f44336;
+        }
+
+        .reset-btn {
+            background: #9e9e9e;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Ask Me Anything! 🤖</h1>
-        <div class="input-group">
-            <input type="text" id="userInput" placeholder="Ask a question..." 
-                   onkeypress="if(event.key === 'Enter') callAPI()">
-            <button onclick="callAPI()">Ask!</button>
+        <h1>Country Guessing Game 🌍</h1>
+        <p style="text-align: center;">Think of a country and I'll try to guess it! Answer my yes/no questions.</p>
+        
+        <div id="startGame" class="input-group">
+            <button onclick="startGame()" style="width: 100%">Start New Game</button>
         </div>
-        <div id="result"></div>
+
+        <div id="gameControls" class="hidden">
+            <div class="chat-container" id="chatContainer"></div>
+            <div class="button-group">
+                <button class="yes-btn" onclick="sendResponse('Yes')">Yes</button>
+                <button class="no-btn" onclick="sendResponse('No')">No</button>
+                <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        async function callAPI() {
-            try {
-                const userQuestion = document.getElementById('userInput').value;
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerText = "Thinking... 🤔";
-                resultDiv.classList.add('thinking');
-                
-                const apiKey = "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";
+        let questionCount = 0;
+        let gameActive = false;
 
+        function addMessage(content, isAI) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
+            messageDiv.textContent = content;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function startGame() {
+            document.getElementById('startGame').classList.add('hidden');
+            document.getElementById('gameControls').classList.remove('hidden');
+            gameActive = true;
+            questionCount = 0;
+            askQuestion();
+        }
+
+        function resetGame() {
+            document.getElementById('startGame').classList.remove('hidden');
+            document.getElementById('gameControls').classList.add('hidden');
+            document.getElementById('chatContainer').innerHTML = '';
+            gameActive = false;
+            questionCount = 0;
+        }
+
+        async function askQuestion() {
+            if (!gameActive) return;
+            
+            questionCount++;
+            const context = document.getElementById('chatContainer').innerText;
+            
+            try {
                 const response = await fetch('https://api.perplexity.ai/chat/completions', {
                     method: 'POST',
                     headers: {
                         'accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiKey
+                        'Authorization': 'Bearer ' + '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'
                     },
                     body: JSON.stringify({
                         model: "sonar-pro",
                         messages: [
-                            {role: "system", content: "You are a friendly and knowledgeable AI assistant. Keep responses concise but engaging."},
-                            {role: "user", content: userQuestion}
+                            {
+                                role: "system", 
+                                content: "You are playing a country guessing game. Ask yes/no questions to guess the country. After 10 questions or if you're confident, make a guess. Keep responses very brief. If making a final guess, start with 'FINAL GUESS:'"
+                            },
+                            {
+                                role: "user", 
+                                content: questionCount === 1 
+                                    ? "Let's play a game where you try to guess the country I'm thinking of. Ask your first yes/no question."
+                                    : `Previous conversation: ${context}\nBased on these answers, ask your next question or make a final guess. This is question ${questionCount}/10.`
+                            }
                         ]
                     })
                 });
-        
+
                 const data = await response.json();
-                resultDiv.classList.remove('thinking');
-                
-                if(data?.choices?.[0]?.message?.content) {
-                    resultDiv.innerText = data.choices[0].message.content;
-                } else {
-                    resultDiv.innerText = "Oops! Something went wrong. Try asking another question!";
+                const aiResponse = data.choices[0].message.content;
+                addMessage(aiResponse, true);
+
+                if (questionCount >= 10 || aiResponse.includes("FINAL GUESS:")) {
+                    gameActive = false;
+                    setTimeout(() => {
+                        addMessage("Game Over! Click 'Reset Game' to play again.", true);
+                    }, 1000);
                 }
-                
+
             } catch (error) {
-                resultDiv.classList.remove('thinking');
-                resultDiv.innerText = "Error: " + error.message;
+                addMessage("Sorry, there was an error. Please try again.", true);
             }
+        }
+
+        function sendResponse(response) {
+            if (!gameActive) return;
+            addMessage(response, false);
+            askQuestion();
         }
     </script>
 </body>
